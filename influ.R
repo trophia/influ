@@ -1,65 +1,77 @@
-#' Influence in linear models
+#' A package for generating step plots, influence plots, CDI plots, and influence metrics for a linear model
+#'
+#' The concept of influence in generalised linear models is described in Bentley et al (in prep; available from author).
+#' This package provides an implementation of the plots and metrics described in that paper.
 #'
 #' @name influ-package
 #' @aliases influ
 #' @docType package
 #' @title Influence in linear models 
 #' @author Nokome Bentley
-#' @examples
-#' #myModel = glm(catch~year+month)
 NULL
 
 library(proto)
 
-#' The influence 
+#' The influence prototype object.
 #'
-#' Details go here
+#' Call the "new" method to clone this object.
+#'
+#' @seealso Influence$new
 Influence = proto()
 
-#' Create a new Influence object
+#' Create a new Influence object.
 #'
-#' Details go here
+#' A new Influence object needs to be created for each combination of a linear model and focus term.
+#' For example, you might compare the inflence of the same term in two separate models:
+#'    influ1 = Influence$new(model1,'year')
+#'    influ2 = Influence$new(model2,'year')
 #'
-#' @name new
-#' @method Influence new
-#' @param model The model which will bea
-#' @param response The response var
+#' @name Influence$new
+#' @param model The model for which the influence of terms will be determined
+#' @param response The response term in the model
+#' @param focus The focus term for which influence is to be calculated.
 #' @return A new Influence object
-Influence$new <- function(.,model,response,focus=NULL){
-  instance = proto()
-  instance$init(model,response,focus)
-  instance
-}
-
-#' Initialise
-#' @name init
-Influence$init <- function(.,model,response,focus){
-  .$model = model
-  .$response = response
-  .$focus = if(is.null(focus)) attr(.$model$terms,"term.labels")[1] else focus
-  .$terms = attr(.$model$terms,"term.labels")
+Influence$new <- function(.,model,response=NULL,focus=NULL){
+  instance = proto(
+    model = model,
+    terms = attr(model$terms,"term.labels")
+  )
   
-  .$labels = list()
-  for(term in .$terms) .$labels[term] = paste(toupper(substring(term,1,1)), substring(term,2),sep="")
-  .$order = list()
-  for(term in .$terms) .$order[term] = 'asis'
+  instance$response = if(is.null(response)) names(model$model)[1] else response
+  instance$focus = if(is.null(focus)) instance$terms[1] else focus
+  
+  instance$labels = list()
+  for(term in instance$terms) instance$labels[term] = paste(toupper(substring(term,1,1)), substring(term,2),sep="")
+  instance$order = list()
+  for(term in instance$terms) instance$order[term] = 'asis'
 
+  #An alternative, but potentially buggy, way of getting response term
   #Obtain the response name. This seems the safest way, albeit long winded.
   #variablesList = attr(model$terms,"variables") #List of variables including the response
   #responseIndex = attr(model$terms,"response") #Index of the response variable in variablesList 
   #responseName = as.character(variablesList)[responseIndex+1]
+
+  instance
 }
 
-#' Coefficients
-#' @name coeffs
+#' Obtain the coefficients associated with a particular term in the model
+#'
+#' Extracts the coefficients
+#'
+#' @name Influence$coeffs
+#' @param model The model to extract coefficients from
+#' @param term The term in the model for which coefficients are extracted                                                                     
 Influence$coeffs = function(.,model=.$model,term=.$focus){
   coeffs = summary(model)$coeff
   rows = substr(row.names(coeffs),1,nchar(term))==term
   c(0,coeffs[rows,1])
 }
 
-#' Standard errors
-#' @name ses
+#' Obtain standard errors for the coefficients associated with a particular term in the model
+#'
+#' Extract standard errors using the method of Francis
+#'
+#' @name Influence$ses
 Influence$ses = function(.,model=.$model,term=.$focus){
   summ = summary(model)
   V = summ$cov.scaled
@@ -73,15 +85,17 @@ Influence$ses = function(.,model=.$model,term=.$focus){
   se
 }
 
-#' Effects
-#' @name effects
+#' Obtain the effects associated with a particular term in the model
+#'
+#' @name Influence$effects
 Influence$effects = function(.,model=.$model,term=.$focus){
   coeffs = .$coeffs(model,term)
   exp(coeffs-mean(coeffs))
 }
 
 #' Calculate
-#' @name calc
+#'
+#' @name Influence$calc
 Influence$calc <- function(.){
 
   #Create a summary table that is an augmented ANOVA table
@@ -96,11 +110,11 @@ Influence$calc <- function(.){
   )
 
   #Create a data frame that is used to store various values for each level of focal term
-  .$indices = data.frame(level=levels(.$model$data[,.$focus]))
+  .$indices = data.frame(level=levels(.$model$model[,.$focus]))
 
-  #Add an unstandardised index. Currently assumes lognormal and that all response values are >0
-  .$indices = merge(.$indices,aggregate(list(unstan=.$model$data[,.$response]),list(level=.$model$data[,.$focus]),function(x)exp(mean(log(x)))))
-  .$indices$unstan = with(.$indices,exp(log(unstan)-mean(log(unstan))))
+  #Add an unstandardised index
+  .$indices = merge(.$indices,aggregate(list(unstan=.$model$model[,.$response]),list(level=.$model$model[,.$focus]),function(x)mean(x)))
+  .$indices$unstan = with(.$indices,exp(unstan-mean(unstan)))
 
   #Add standardised index. This is done again below when all terms are added but useful to have this name and also have SEs
   coeffs = .$coeffs()
@@ -127,25 +141,25 @@ Influence$calc <- function(.){
     .$summary$aic[.$summary$term==term] = AIC(termsModel)
   }
 
-  .$preds = data.frame(cbind(.$model$data[,.$terms],predict(.$model,type='terms',se.fit=T)))
+  .$preds = data.frame(cbind(.$model$model[,.$terms],predict(.$model,type='terms',se.fit=T)))
 
   #Calculate influences and statisitcs
-  #.$terms[-1] so that .$focus is not included
-  .$influences = data.frame(level=levels(.$model$data[,.$focus]))
+  .$influences = data.frame(level=levels(.$model$model[,.$focus]))
   overall = c(NA,NA) # NAs for NULL and focus terms
   trend = c(NA,NA)
-  for(term in .$terms[-1]){
-      infl = aggregate(
-	list(value = .$preds[,paste('fit',term,sep='.')]),
-	list(level = .$preds[,.$focus]),
-	mean
-      )
-
-    overall = c(overall,with(infl,exp(mean(abs(value)))-1))
-    trend = c(trend,with(infl,exp(cov(1:length(value),value)/var(1:length(value)))-1))
-
-      names(infl) = c('level',term)
-      .$influences = merge(.$influences,infl,all.x=T,by='level')
+  for(term in .$terms){
+      if(term!=.$focus){
+	colName = gsub("[\\(\\)]",'.',term)
+	infl = aggregate(
+	  list(value = .$preds[,paste('fit',colName,sep='.')]),
+	  list(level = .$preds[,.$focus]),
+	  mean
+	)
+	overall = c(overall,with(infl,exp(mean(abs(value)))-1))
+	trend = c(trend,with(infl,exp(cov(1:length(value),value)/var(1:length(value)))-1))
+	names(infl) = c('level',term)
+	.$influences = merge(.$influences,infl,all.x=T,by='level')
+      }
   }
   #Insert statistics into summary table with NAs for NULL and focus terms
   .$summary$overall = overall
@@ -154,8 +168,8 @@ Influence$calc <- function(.){
 }
 
 #' Plot of standardization effect of model
-#' Standardized versus unstandardised coefficients
-#' @name stanPlot
+#'
+#' @name Influence$stanPlot
 Influence$stanPlot <- function(.){
   with(.$indices,{
     plot(NA,ylim=c(0,max(unstan,stanUpper)),xlim=c(1,length(level)),las=1,ylab='Index',xlab=.$labels[[.$focus]],xaxt='n')
@@ -167,9 +181,10 @@ Influence$stanPlot <- function(.){
   })
 }
 
-#' Index Plot
-#' @name indiPlot
-Influence$indiPlot <- function(.){
+#' Step Plot
+#'
+#' @name Influence$stepPlot
+Influence$stepPlot <- function(.){
   startCol = 6
   cols = startCol:ncol(.$indices)
   with(.$indices,{
@@ -181,7 +196,8 @@ Influence$indiPlot <- function(.){
 }
 
 #' Influence plot
-#' @name influPlot
+#'
+#' @name Influence$influPlot
 Influence$influPlot <- function(.){
   cols = 2:ncol(.$influences)
   with(.$influences,{
@@ -194,16 +210,19 @@ Influence$influPlot <- function(.){
 }
 
 #' Generate a coefficient-distribution-influence (CDI) plot for a model term
-#' @name cdiPlot
+#'
+#' @name Influence$cdiPlot
 #' @examples
 #' #inf$cdiPlot("month")
 #' @seealso cdiPlotAll
 Influence$cdiPlot <- function(.,term){
   par(oma=c(1,1,1,1),cex.lab=1.25,cex.axis=1.25)
   layout(matrix(c(1,1,0,2,2,3,2,2,3),3,3,byrow=TRUE))
+
+  colName = gsub("[\\(\\)]",'.',term)
   
   #Define levels of term on which coefficient and distribution plots will be based
-  levels = .$preds[,term]
+  levels = .$preds[,colName]
   #Numeric terms are cut into factors
   if(is.numeric(levels)){
     breaks = pretty(levels,30)
@@ -215,14 +234,14 @@ Influence$cdiPlot <- function(.,term){
 
   #Reorder levels according to coefficients if necessary
   if(.$order[[term]]=='coef'){
-    coeffs = aggregate(.$preds[,paste('fit',term,sep='.')],list(levels),head,1)
+    coeffs = aggregate(.$preds[,paste('fit',colName,sep='.')],list(levels),head,1)
     names(coeffs) = c('term','coeff')
     coeffs = coeffs[order(coeffs$coeff),]
     levels = factor(levels,levels=coeffs$term,ordered=T)
   }
 
   #Coefficients
-  coeffs = aggregate(.$preds[,paste(c('fit','se.fit'),term,sep='.')],list(levels),head,1)
+  coeffs = aggregate(.$preds[,paste(c('fit','se.fit'),colName,sep='.')],list(levels),head,1)
   names(coeffs) = c('term','coeff','se')
   coeffs = within(coeffs,{
     lower = coeff-2*se
@@ -240,7 +259,7 @@ Influence$cdiPlot <- function(.,term){
   })
 
   #Distribution
-  distrs = aggregate(.$preds[,term],list(levels,.$preds[,.$focus]),length)
+  distrs = aggregate(.$preds[,colName],list(levels,.$preds[,.$focus]),length)
   names(distrs) = c('term','focus','count')
   distrs = merge(distrs,aggregate(list(total=distrs$count),list(focus=distrs$focus),sum))
   distrs$prop = with(distrs,count/total)
@@ -271,7 +290,8 @@ Influence$cdiPlot <- function(.,term){
 }
 
 #' Plot all cdis
-#' @name cdiPlotAll
+#'
+#' @name Influence$cdiPlotAll
 Influence$cdiPlotAll <- function(.,done=function(term){
   cat("cdiPlot for",term,". Press enter for next")
   scan()

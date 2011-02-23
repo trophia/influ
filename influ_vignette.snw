@@ -1,0 +1,106 @@
+\documentclass[a4paper]{article}
+
+\title{An example of how to use the 'influ' package}
+\author{Nokome Bentley}
+
+\begin{document}
+
+\maketitle
+
+<<echo=FALSE>>=
+source('/Trophia/Tanga/Analyser/influ/influ.R')
+#Prepare data
+data = read.table("tre7.csv",colClasses='character',sep=",",header=T)
+#Only some fields are required
+data = data[,c(1,2,3,5,7,10,11)]
+#Convert to factors and numbers
+data = within(data,{
+  fyear = factor(as.integer(fyear))
+  month = factor(as.integer(month),levels=c(10:12,1:9),labels=c('Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'))
+  area = factor(area)
+  target = factor(target)
+  vessel = factor(as.integer(vessel))
+  num = as.numeric(num)
+  catch = as.numeric(catch)
+})
+#Only use positive catches
+data = subset(data,catch>0 & num>0)
+#For this paper rename some variables
+names(data)[1] = 'year'
+names(data)[6] = 'tows'
+tre7 = data
+@
+
+For this vignette we use the same TRE 7 data set as described in Bentley et al (in prep)
+and create the same generalised linear model,
+<<>>=
+model = glm(log(catch)~year+log(tows)+month+vessel+target+area,data=tre7)
+@
+(At present, the \texttt{influ} package does not work with \texttt{lm} models)
+
+Load the influ package into the workspace the usual way,\texttt{library(influ)}
+
+Next create an influence object for the model,
+<<>>=
+  infYear = Influence$new(model)
+@
+By default, \texttt{new} will use the first term in the model formula, in this case year,
+as the focus term (the term for which indices are calculated and influence upon is determined). But
+you can also specifiy which term should be the focus term,
+<<>>=
+infMonth = Influence$new(model,focus='month')
+@
+
+Each \texttt{Influence} object needs to be initialised using the 
+\texttt{calc} method before it can be used, 
+<<>>=
+infYear$calc()
+@
+Once that is done then it is possible to start looking at some plots and metrics.
+
+The \texttt{summary} attribute is a \texttt{data.frame} with a row for each term
+and columns describing the deviance explained and the influence on the 
+focus term
+<<echo=TRUE>>=
+infYear$summary
+@
+
+The \texttt{stanPlot} method provides a simple plot of both the standardised (with +/- 2 standard errors) and unstandardised indices for the focus term,
+\begin{center}
+<<fig=TRUE,echo=TRUE>>=
+infYear$stanPlot()
+@
+\end{center}
+
+The \texttt{stepPlot} method shows standardised indices for the focus term when each
+of the terms is added to the model (in the order they are specified in the model formula),
+\begin{center}
+<<fig=TRUE,echo=TRUE>>=
+infYear$stepPlot()
+@
+\end{center}
+
+The \texttt{influePlot} method shows the influence of each term for each level
+of the focus term,
+\begin{center}
+<<fig=TRUE,echo=TRUE>>=
+infYear$influPlot()
+@
+\end{center}
+
+Coefficient-distribution-influence (CDI) plots (see Bentley et al (in prep) for a description) can be generated for
+a single term,
+\begin{center}
+<<fig=TRUE,echo=TRUE>>=
+infYear$cdiPlot('month')
+@
+\end{center}
+
+Or you can call texttt{cdiPlotAll}, optionally with a callback function, to produce
+CDI plots for allmodel terms,
+<<>>=
+infYear$cdiPlotAll(function(term)dev.copy2pdf(file=paste("CDI ",term,".pdf",sep='')))
+@
+In the above example a PDF file is created for each CDI plot with the name "CDI month.pdf" etc.
+
+\end{document}
