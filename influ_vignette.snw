@@ -8,8 +8,10 @@
 \maketitle
 
 <<echo=FALSE>>=
+#Use source to load Influence. Do this rather than library(influ) so that 
+#changes in influ.R are immeadiately available without having to rebuild package
 source('/Trophia/Tanga/Analyser/influ/influ.R')
-#Prepare data
+#Load and prepare data
 data = read.table("tre7.csv",colClasses='character',sep=",",header=T)
 #Only some fields are required
 data = data[,c(1,2,3,5,7,10,11)]
@@ -25,31 +27,30 @@ data = within(data,{
 })
 #Only use positive catches
 data = subset(data,catch>0 & num>0)
-#For this paper rename some variables
+#For this vignette rename some variables
 names(data)[1] = 'year'
 names(data)[6] = 'tows'
 tre7 = data
 @
 
-For this vignette we use the same TRE 7 data set as described in Bentley et al (in prep)
-and create the same generalised linear model,
+For this vignette we use the same TRE 7 data, and the same generalised linear model, 
+as described in Bentley et al (in prep),
 <<>>=
 model = glm(log(catch)~year+log(tows)+month+vessel+target+area,data=tre7)
 @
-(At present, the \texttt{influ} package does not work with \texttt{lm} models)
 
-Load the influ package into the workspace the usual way,\texttt{library(influ)}
-
-Next create an influence object for the model,
+Load the influ package into the workspace the usual way,\texttt{library(influ)}, 
+and create an influence object for the model,
 <<>>=
   infYear = Influence$new(model)
 @
-By default, \texttt{new} will use the first term in the model formula, in this case year,
+By default, \texttt{new} will use the first term in the model formula, in this case \texttt{year},
 as the focus term (the term for which indices are calculated and influence upon is determined). But
 you can also specifiy which term should be the focus term,
 <<>>=
 infMonth = Influence$new(model,focus='month')
 @
+At present, the \texttt{influ} package does not work with \texttt{lm} models, but may do in the future.
 
 Each \texttt{Influence} object needs to be initialised using the 
 \texttt{calc} method before it can be used, 
@@ -57,15 +58,14 @@ Each \texttt{Influence} object needs to be initialised using the
 infYear$calc()
 @
 Once that is done then it is possible to start looking at some plots and metrics.
-
 The \texttt{summary} attribute is a \texttt{data.frame} with a row for each term
-and columns describing the deviance explained and the influence on the 
-focus term
+and columns describing the deviance explained and the influence metrics,
 <<echo=TRUE>>=
 infYear$summary
 @
 
-The \texttt{stanPlot} method provides a simple plot of both the standardised (with +/- 2 standard errors) and unstandardised indices for the focus term,
+The \texttt{stanPlot} method provides a simple plot of both the standardised
+(with +/- 2 standard errors) and unstandardised indices for the focus term,
 \begin{center}
 <<fig=TRUE,echo=TRUE>>=
 infYear$stanPlot()
@@ -89,10 +89,27 @@ infYear$influPlot()
 \end{center}
 
 Coefficient-distribution-influence (CDI) plots (see Bentley et al (in prep) for a description) can be generated for
-a single term,
+a single term using the /texttt{cdiPlot} method,
 \begin{center}
 <<fig=TRUE,echo=TRUE>>=
 infYear$cdiPlot('month')
+@
+\end{center}
+
+For some terms in the model that are categorical factors (i.e. do not have a natural order to the
+levels of the factor) the CDI plot is more intuitive if you specify that the order is in to be based
+on the coefficients,
+\begin{center}
+<<fig=TRUE,echo=TRUE>>=
+infYear$order['vessel'] = 'coef'
+infYear$cdiPlot('vessel')
+@
+\end{center}
+
+CDI plots can also be generated for continuous terms,
+\begin{center}
+<<fig=TRUE,echo=TRUE>>=
+infYear$cdiPlot('log(tows)')
 @
 \end{center}
 
@@ -101,6 +118,7 @@ CDI plots for allmodel terms,
 <<>>=
 infYear$cdiPlotAll(function(term)dev.copy2pdf(file=paste("CDI ",term,".pdf",sep='')))
 @
-In the above example a PDF file is created for each CDI plot with the name "CDI month.pdf" etc.
+In the above example a PDF file is created for each CDI plot with the name "CDI month.pdf" etc. Note that 
+the option \texttt{infYear\$order['vessel'] = 'coef'} will still apply to vessel CDI plot created by this call.
 
 \end{document}

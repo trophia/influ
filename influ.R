@@ -32,26 +32,31 @@ Influence = proto()
 #' @param focus The focus term for which influence is to be calculated.
 #' @return A new Influence object
 Influence$new <- function(.,model,response=NULL,focus=NULL){
-  instance = proto(
+  instance = .$proto(
     model = model,
-    terms = attr(model$terms,"term.labels")
+    response = response,
+    focus = focus
   )
+  instance$init()
+  instance
+}
+
+Influence$init <- function(.){
+  .$terms = attr(.$model$terms,"term.labels")
+  if(is.null(.$response)) .$response = names(.$model$model)[1]
+  if(is.null(.$focus)) .$focus = .$terms[1]
   
-  instance$response = if(is.null(response)) names(model$model)[1] else response
-  instance$focus = if(is.null(focus)) instance$terms[1] else focus
-  
-  instance$labels = list()
-  for(term in instance$terms) instance$labels[term] = paste(toupper(substring(term,1,1)), substring(term,2),sep="")
-  instance$order = list()
-  for(term in instance$terms) instance$order[term] = 'asis'
+  .$labels = list()
+  for(term in .$terms) .$labels[term] = term
+
+  .$orders = list()
+  for(term in .$terms) .$orders[term] = 'asis'
 
   #An alternative, but potentially buggy, way of getting response term
   #Obtain the response name. This seems the safest way, albeit long winded.
   #variablesList = attr(model$terms,"variables") #List of variables including the response
   #responseIndex = attr(model$terms,"response") #Index of the response variable in variablesList 
   #responseName = as.character(variablesList)[responseIndex+1]
-
-  instance
 }
 
 #' Obtain the coefficients associated with a particular term in the model
@@ -97,7 +102,6 @@ Influence$effects = function(.,model=.$model,term=.$focus){
 #'
 #' @name Influence$calc
 Influence$calc <- function(.){
-
   #Create a summary table that is an augmented ANOVA table
   #TODO to speed up mke this part of term loop
   aov = as.data.frame(anova(.$model))
@@ -108,14 +112,11 @@ Influence$calc <- function(.){
     devProp = aov$Deviance/aov[1,'Resid. Dev'],
     aic = NA
   )
-
   #Create a data frame that is used to store various values for each level of focal term
   .$indices = data.frame(level=levels(.$model$model[,.$focus]))
-
   #Add an unstandardised index
   .$indices = merge(.$indices,aggregate(list(unstan=.$model$model[,.$response]),list(level=.$model$model[,.$focus]),function(x)mean(x)))
   .$indices$unstan = with(.$indices,exp(unstan-mean(unstan)))
-
   #Add standardised index. This is done again below when all terms are added but useful to have this name and also have SEs
   coeffs = .$coeffs()
   ses = .$ses()
@@ -123,7 +124,6 @@ Influence$calc <- function(.){
   .$indices$stan = exp(coeffs-base)
   .$indices$stanLower = exp(coeffs-2*ses-base)
   .$indices$stanUpper = exp(coeffs+2*ses-base)
-
   #Create models with terms succesively added
   #TODO calculate influence statistics in this loop too
   for(termCount in 1:length(.$terms)){
@@ -140,18 +140,15 @@ Influence$calc <- function(.){
     #Calculate AIC
     .$summary$aic[.$summary$term==term] = AIC(termsModel)
   }
-
-  .$preds = data.frame(cbind(.$model$model[,.$terms],predict(.$model,type='terms',se.fit=T)))
-
+  .$preds = cbind(.$model$data,predict(.$model,type='terms',se.fit=T))
   #Calculate influences and statisitcs
   .$influences = data.frame(level=levels(.$model$model[,.$focus]))
   overall = c(NA,NA) # NAs for NULL and focus terms
   trend = c(NA,NA)
   for(term in .$terms){
       if(term!=.$focus){
-	colName = gsub("[\\(\\)]",'.',term)
 	infl = aggregate(
-	  list(value = .$preds[,paste('fit',colName,sep='.')]),
+	  list(value = .$preds[,paste('fit',term,sep='.')]),
 	  list(level = .$preds[,.$focus]),
 	  mean
 	)
@@ -164,7 +161,6 @@ Influence$calc <- function(.){
   #Insert statistics into summary table with NAs for NULL and focus terms
   .$summary$overall = overall
   .$summary$trend = trend
-
 }
 
 #' Plot of standardization effect of model
@@ -215,14 +211,25 @@ Influence$influPlot <- function(.){
 #' @examples
 #' #inf$cdiPlot("month")
 #' @seealso cdiPlotAll
-Influence$cdiPlot <- function(.,term){
+Influence$cdiPlot <- function(.,term,variable=NULL){
   par(oma=c(1,1,1,1),cex.lab=1.25,cex.axis=1.25)
   layout(matrix(c(1,1,0,2,2,3,2,2,3),3,3,byrow=TRUE))
-
-  colName = gsub("[\\(\\)]",'.',term)
   
   #Define levels of term on which coefficient and distribution plots will be based
-  levels = .$preds[,colName]
+  #This is done by search for each column name in the data as a whole word in the
+  #each term. This allows for matching of terms like 'poly(log(var),3)' with 'var'
+  if(is.null(variable)){
+    for(name in names(.$preds)){
+      match = grep(paste('([^[:alnum:]_])+',name,'([^[:alnum:]_])+',sep=''),paste('(',term,')')) # ([^\\w])+ Means ignore any 'word' character (alphanumerics plus underscore)
+      if(length(match)>0){
+	variable = name
+	break
+      }
+    }
+  }
+  if(is.null(variable)) stop('Unable to find a matching variable for term "',term,'". Please specify in the argument "variable".')
+  levels = .$preds[,variable]
+
   #Numeric terms are cut into factors
   if(is.numeric(levels)){
     breaks = pretty(levels,30)
@@ -233,15 +240,15 @@ Influence$cdiPlot <- function(.,term){
   }
 
   #Reorder levels according to coefficients if necessary
-  if(.$order[[term]]=='coef'){
-    coeffs = aggregate(.$preds[,paste('fit',colName,sep='.')],list(levels),head,1)
+  if(.$orders[[term]]=='coef'){
+    coeffs = aggregate(.$preds[,paste('fit',term,sep='.')],list(levels),head,1)
     names(coeffs) = c('term','coeff')
     coeffs = coeffs[order(coeffs$coeff),]
     levels = factor(levels,levels=coeffs$term,ordered=T)
   }
 
   #Coefficients
-  coeffs = aggregate(.$preds[,paste(c('fit','se.fit'),colName,sep='.')],list(levels),head,1)
+  coeffs = aggregate(.$preds[,paste(c('fit','se.fit'),term,sep='.')],list(levels),head,1)
   names(coeffs) = c('term','coeff','se')
   coeffs = within(coeffs,{
     lower = coeff-2*se
@@ -259,16 +266,19 @@ Influence$cdiPlot <- function(.,term){
   })
 
   #Distribution
-  distrs = aggregate(.$preds[,colName],list(levels,.$preds[,.$focus]),length)
+  distrs = aggregate(.$preds[,1],list(levels,.$preds[,.$focus]),length)
   names(distrs) = c('term','focus','count')
   distrs = merge(distrs,aggregate(list(total=distrs$count),list(focus=distrs$focus),sum))
   distrs$prop = with(distrs,count/total)
   par(mar=c(5,5,0,0),las=1)
-  xlab = .$labels[[term]]
+  xlab = .$labels[[variable]]
+  if(is.null(xlab)) xlab = variable
+  ylab= .$labels[[.$focus]]
+  if(is.null(ylab)) ylab = .$focus
   with(distrs,{
     xs = 1:max(as.integer(term))
     ys = 1:max(as.integer(focus))
-    plot(NA,xlim=range(xs),ylim=range(ys),xaxt='n',yaxt='n',xlab=xlab,ylab=.$labels[[.$focus]])
+    plot(NA,xlim=range(xs),ylim=range(ys),xaxt='n',yaxt='n',xlab=xlab,ylab=ylab)
     abline(v=xs,lty=1,col='grey')
     axis(1,at=xs,labels=levels(term)[xs])
     abline(h=ys,lty=1,col='grey')
@@ -293,7 +303,7 @@ Influence$cdiPlot <- function(.,term){
 #'
 #' @name Influence$cdiPlotAll
 Influence$cdiPlotAll <- function(.,done=function(term){
-  cat("cdiPlot for",term,". Press enter for next")
+  cat("cdiPlot for",term,". Press enter for next\n")
   scan()
 }){
   for(term in .$terms) {
