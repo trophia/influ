@@ -101,7 +101,7 @@ levels of the factor) the CDI plot is more intuitive if you specify that the ord
 on the coefficients,
 \begin{center}
 <<fig=TRUE,echo=TRUE>>=
-infYear$order['vessel'] = 'coef'
+infYear$orders['vessel'] = 'coef'
 infYear$cdiPlot('vessel')
 @
 \end{center}
