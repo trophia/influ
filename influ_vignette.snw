@@ -45,7 +45,7 @@ and create an influence object for the model,
   infYear = Influence$new(model)
 @
 By default, \texttt{new} will use the first term in the model formula, in this case \texttt{year},
-as the focus term (the term for which indices are calculated and influence upon is determined). But
+as the focus term (the term for which indices are calculated and for which influence is based). But
 you can also specifiy which term should be the focus term,
 <<>>=
 infMonth = Influence$new(model,focus='month')

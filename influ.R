@@ -3,6 +3,14 @@
 #' The concept of influence in generalised linear models is described in Bentley et al (in prep; available from author).
 #' This package provides an implementation of the plots and metrics described in that paper.
 #'
+#' Currently, this package works for \code{glm} models with log transformed dependent variables. These
+#' are the type of models commonly used for one part of the delta-lognormal approach to catch-per-unit-effort (CPUE)
+#' standardisation. e.g.\code{ model = glm(log(catch)~year+month+vessel+effort)}
+#' In time, the package may be generalised to other types of models (e.g. \code{gam}s) and other types of dependent variables.
+#'
+#' This document provides minimal documentation and the best way to learn how to use this package is through the vignette:
+#'	"An example of how to use the ’influ’ package"
+#'
 #' @name influ-package
 #' @aliases influ
 #' @docType package
@@ -14,17 +22,16 @@ library(proto)
 
 #' The influence prototype object.
 #'
-#' Call the "new" method to clone this object.
-#'
 #' @seealso Influence$new
 Influence = proto()
 
 #' Create a new Influence object.
 #'
-#' A new Influence object needs to be created for each combination of a linear model and focus term.
-#' For example, you might compare the inflence of the same term in two separate models:
+#' A new Influence object needs to be created for each combination of a model and focus term.
+#' For example, you might compare the inflence of the same term in two separate models:\code{
 #'    influ1 = Influence$new(model1,'year')
 #'    influ2 = Influence$new(model2,'year')
+#' }
 #'
 #' @name Influence$new
 #' @param model The model for which the influence of terms will be determined
@@ -65,7 +72,8 @@ Influence$init <- function(.){
 #'
 #' @name Influence$coeffs
 #' @param model The model to extract coefficients from
-#' @param term The term in the model for which coefficients are extracted                                                                     
+#' @param term The term in the model for which coefficients are extracted
+#' @return A vector of coefficients                                                                     
 Influence$coeffs = function(.,model=.$model,term=.$focus){
   coeffs = summary(model)$coeff
   rows = substr(row.names(coeffs),1,nchar(term))==term
@@ -77,6 +85,8 @@ Influence$coeffs = function(.,model=.$model,term=.$focus){
 #' Extract standard errors using the method of Francis
 #'
 #' @name Influence$ses
+#' @param model The model to extract standard errors for a coefficient from
+#' @param term The term in the model for which coefficients SEs are extracted
 Influence$ses = function(.,model=.$model,term=.$focus){
   summ = summary(model)
   V = summ$cov.scaled
@@ -93,14 +103,20 @@ Influence$ses = function(.,model=.$model,term=.$focus){
 #' Obtain the effects associated with a particular term in the model
 #'
 #' @name Influence$effects
+#' @param model The model to extract effects from
+#' @param term The term in the model for which effects are extracted
+#' @return A numeric vector of effects for the model term
 Influence$effects = function(.,model=.$model,term=.$focus){
   coeffs = .$coeffs(model,term)
   exp(coeffs-mean(coeffs))
 }
 
-#' Calculate
+#' Perform necessary calculations
+#'
+#' This method must be called for the \code{$summary} data frame to be available or before any plots (\code{$stanPlot(),$stepPlot(),$influPlot(),$cdiPlot()}) can be generated from the Influence object
 #'
 #' @name Influence$calc
+#' @value None
 Influence$calc <- function(.){
   #Create a summary table that is an augmented ANOVA table
   #TODO to speed up mke this part of term loop
@@ -163,9 +179,12 @@ Influence$calc <- function(.){
   .$summary$trend = trend
 }
 
-#' Plot of standardization effect of model
+#' Standardization plot
+#'
+#' This plot simply compares the standardised and unstandardised indices from a model so that the overall standardisation effect can be ascertained.
 #'
 #' @name Influence$stanPlot
+#' @return None
 Influence$stanPlot <- function(.){
   with(.$indices,{
     plot(NA,ylim=c(0,max(unstan,stanUpper)),xlim=c(1,length(level)),las=1,ylab='Index',xlab=.$labels[[.$focus]],xaxt='n')
@@ -177,9 +196,12 @@ Influence$stanPlot <- function(.){
   })
 }
 
-#' Step Plot
+#' Step plot
+#'
+#' A plot of the standardised indices as each explanatory variable is added to the model (in the order that they are specified in the model equation)
 #'
 #' @name Influence$stepPlot
+#' @return None
 Influence$stepPlot <- function(.){
   startCol = 6
   cols = startCol:ncol(.$indices)
@@ -193,7 +215,10 @@ Influence$stepPlot <- function(.){
 
 #' Influence plot
 #'
+#' A plot of the influence of each explanatory variable in the model
+#'
 #' @name Influence$influPlot
+#' @return None
 Influence$influPlot <- function(.){
   cols = 2:ncol(.$influences)
   with(.$influences,{
@@ -205,11 +230,13 @@ Influence$influPlot <- function(.){
   })
 }
 
-#' Generate a coefficient-distribution-influence (CDI) plot for a model term
+#' A coefficient-distribution-influence (CDI) plot for a model term
 #'
 #' @name Influence$cdiPlot
-#' @examples
-#' #inf$cdiPlot("month")
+#' @param term The model term for which the CDI plot should be generated
+#' @param variable Optional. In some cases it may be necessary to specifiy the variable that is related to the term. For example, for the term \code{"log(effort)"} the variable is \code{"effort"}. 
+#' In most cases this can be deduced from the term, but for complexes terms this argumey may also need to be supplied (an error message will tell you if it does).
+#' @return None
 #' @seealso cdiPlotAll
 Influence$cdiPlot <- function(.,term,variable=NULL){
   par(oma=c(1,1,1,1),cex.lab=1.25,cex.axis=1.25)
@@ -299,9 +326,11 @@ Influence$cdiPlot <- function(.,term,variable=NULL){
   
 }
 
-#' Plot all cdis
+#' Plot a CDI plot for each of the terms in the model
 #'
 #' @name Influence$cdiPlotAll
+#' @param done A function that is called (with the term string as an argument) after each CDI plot is generated. Optional.
+#' @return None
 Influence$cdiPlotAll <- function(.,done=function(term){
   cat("cdiPlot for",term,". Press enter for next\n")
   scan()
