@@ -9,7 +9,7 @@
 #' In time, the package may be generalised to other types of models (e.g. \code{gam}s) and other types of dependent variables.
 #'
 #' This document provides minimal documentation and the best way to learn how to use this package is through the vignette:
-#'	"An example of how to use the ’influ’ package"
+#'	"An example of how to use the 'influ' package"
 #'
 #' @name influ-package
 #' @aliases influ
@@ -48,6 +48,12 @@ Influence$new <- function(.,model,response=NULL,focus=NULL){
   instance
 }
 
+#' Initialise the Influence object
+#'
+#' This method should not need to be called directly. It is called from the \code{$new} constructor method.
+#'
+#' @name Influence$init
+#' @return None
 Influence$init <- function(.){
   .$terms = attr(.$model$terms,"term.labels")
   if(is.null(.$response)) .$response = names(.$model$model)[1]

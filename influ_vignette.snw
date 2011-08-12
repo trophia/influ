@@ -10,7 +10,7 @@
 <<echo=FALSE>>=
 #Use source to load Influence. Do this rather than library(influ) so that 
 #changes in influ.R are immeadiately available without having to rebuild package
-source('/Trophia/Tanga/Analyser/influ/influ.R')
+source('influ.R')
 #Load and prepare data
 data = read.table("tre7.csv",colClasses='character',sep=",",header=T)
 #Only some fields are required
