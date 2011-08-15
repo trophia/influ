@@ -26,7 +26,7 @@ License: Creative Commons Attribution-ShareAlike (CC BY-SA 3.0 http://creativeco
 	For attribution please cite Bentley, N., Kendrick, T. H., Starr, P. J., & Breen, P. A. (in preparation). Influence plots and metrics: tools for better understanding fisheries catch per unit effort standardisations.
 LazyLoad: yes
 Collate: 'influ.R'
-Suggests: proto
+Depends: proto
 ",file = 'influ/DESCRIPTION')
 #Run roxygen ("R CMD roxygen -d influ" could be used instead)
 roxygenize('influ',roxygen.dir='influ',copy.package=FALSE,unlink.target=FALSE)
