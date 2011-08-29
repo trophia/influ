@@ -125,7 +125,7 @@ Influence$effects = function(.,model=.$model,term=.$focus){
 #' @value None
 Influence$calc <- function(.){
   #Create a summary table that is an augmented ANOVA table
-  #TODO to speed up mke this part of term loop
+  #TODO to speed up make this part of term loop
   aov = as.data.frame(anova(.$model))
   .$summary = data.frame(
     term = row.names(aov),
@@ -151,8 +151,8 @@ Influence$calc <- function(.){
   for(termCount in 1:length(.$terms)){
     term = .$terms[termCount]
     #Update both formula and model
-    formula = update(.$model$formula,formula(paste("~",paste(paste(.$terms[1:termCount],collapse='+')))))
-    termsModel = update(.$model,formula)
+    formula = update.formula(.$model$formula,formula(paste("~",paste(paste(.$terms[1:termCount],collapse='+')))))
+    termsModel = update(.$model,formula,data=.$model$data) #It is necessary to provide the "data" argument otherwise the update call may not be able to find the data in scope (depends upon in which scope the orginal GLM was constructed)
     #Get index for this model
     index = .$effects(termsModel)
     #Add column to .$indices
