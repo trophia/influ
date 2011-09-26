@@ -1,7 +1,22 @@
+# Copyright (c) 2010-2011 Nokome Bentley, Trophia Ltd
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+# 
+#     * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, 
+# BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
+# SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 #' A script for building the "influ" package on Linux
 #'
 #' R --vanilla < influ_build.R
-#' Copyright 2010-2011 Nokome Bentley
+#'
 
 library(roxygen)
 
@@ -22,8 +37,7 @@ Author: Nokome Bentley <nbentley@trophia.com>
 Maintainer: Nokome Bentley <nbentley@trophia.com>
 URL: http://projects.trophia.com/influ
 Description: A package for generating step plots, influence plots, CDI plots, and influence metrics for a GLM model
-License: Creative Commons Attribution-ShareAlike (CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/). 
-	For attribution please cite Bentley, N., Kendrick, T. H., Starr, P. J., & Breen, P. A. (in preparation). Influence plots and metrics: tools for better understanding fisheries catch per unit effort standardisations.
+License: BSD 2-Clause
 LazyLoad: yes
 Collate: 'influ.R'
 Depends: proto
@@ -42,8 +56,8 @@ system('pdflatex influ_vignette.tex')
 ##Build linux source package
 system('R CMD build influ')
 
-##Build windows package by uploading to http://win-builder.r-project.org/
-##It is of course to cross-build R packages or to build on Windows (http://www.biostat.wisc.edu/~kbroman/Rintro/Rwinpack.html) but both
+##Build windows package by uploading influ_0.x.tar.gz to http://win-builder.r-project.org/
+##It is of course possible to cross-build R packages or to build on Windows (http://www.biostat.wisc.edu/~kbroman/Rintro/Rwinpack.html) but both
 ## are quite involved, and the above is not.
 
 #Check that the package can be installed properly
