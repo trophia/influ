@@ -223,16 +223,38 @@ Influence$stanPlot <- function(.){
 #' A plot of the standardised indices as each explanatory variable is added to the model (in the order that they are specified in the model equation)
 #'
 #' @name Influence$stepPlot
+#' @param panels Whether or not to produce a "progressive" step plot (default) in which each step is represented by a separate 
+#'	panel with the previous steps shown as a dashed line and other steps shown as dashed grey lines. If FALSE then a single panel
+#'	plot is produced with symbols for each step
 #' @return None
-Influence$stepPlot <- function(.){
+Influence$stepPlot <- function(.,panels=T,setpar=T){
   startCol = 6
   cols = startCol:ncol(.$indices)
-  with(.$indices,{
-    plot(NA,ylim=c(0,max(.$indices[,cols])),xlim=c(1,nrow(.$indices)),las=1,ylab='Index',xlab=.$labels[[.$focus]],xaxt='n')
-    for(col in cols) lines(as.integer(level),.$indices[,col],type='o',pch=col-startCol+1,cex=1.25)
-    axis(side=1,at=1:length(level),labels=level)
-    legend('top',legend=names(.$indices)[cols],pch=cols-startCol+1,pt.cex=1.25,bty='n')
-  })
+  if(panels){
+    if(setpar)par(mfrow=c(length(cols),1),mar=c(0,4,0,0),oma=c(4,1,1,1))
+    levels = as.integer(.$indices$level)
+    xlim=c(1,length(levels))
+    ylim=c(0,max(.$indices[,cols]))
+    for(col in cols){
+      plot(NA,xaxt='n',las=1,ylab='Index',ylim=ylim,xlim=xlim)
+      #abline(h=1,lty=2)
+      for(prev in cols[1]:col){
+	if(prev<col-1) lines(levels,.$indices[,prev],col='grey',lwd=1.5)
+	if(prev==col-1) lines(levels,.$indices[,prev],lty=3,col='black',lwd=1.5)
+	if(prev==col) points(levels,.$indices[,prev],pch=16,cex=1.25,col='black',type='o')
+      }
+      legend('topleft',legend=names(.$indices)[col],bty='n')
+    }
+    axis(side=1,at=1:length(.$indices$level),labels=.$indices$level)
+  }
+  else {
+    with(.$indices,{
+      plot(NA,ylim=c(0,max(.$indices[,cols])),xlim=c(1,nrow(.$indices)),las=1,ylab='Index',xlab=.$labels[[.$focus]],xaxt='n')
+      for(col in cols) lines(as.integer(level),.$indices[,col],type='o',pch=col-startCol+1,cex=1.25)
+      axis(side=1,at=1:length(level),labels=level)
+      legend('top',legend=names(.$indices)[cols],pch=cols-startCol+1,pt.cex=1.25,bty='n')
+    })
+  }
 }
 
 #' Influence plot
@@ -240,16 +262,45 @@ Influence$stepPlot <- function(.){
 #' A plot of the influence of each explanatory variable in the model
 #'
 #' @name Influence$influPlot
+#' @param panels Whether or not to produce a plot with separate panels for each variable
 #' @return None
-Influence$influPlot <- function(.){
+Influence$influPlot <- function(.,panels=T,setpar=T){
   cols = 2:ncol(.$influences)
-  with(.$influences,{
-    plot(NA,ylim=c(0,max(exp(.$influences[,cols]))),xlim=c(1,nrow(.$influences)),las=1,ylab='Influence',xlab=.$labels[[.$focus]],xaxt='n')
-    for(col in cols) lines(as.integer(level),exp(.$influences[,col]),type='o',pch=col,cex=1.25)
-    axis(side=1,at=1:length(level),labels=level)
-    legend('top',legend=names(.$influences)[cols],pch=cols,pt.cex=1.25,bty='n')
-    abline(h=1,lty=2)
-  })
+  ylim=exp(range(.$influences[,cols]))
+  xlim=c(1,nrow(.$influences))
+  if(panels){
+    if(setpar) par(mfrow=c(length(cols),1),mar=c(0,4,0,0),oma=c(4,1,1,1))
+    levels = as.integer(.$influences$level)
+    for(col in cols){
+      plot(levels,exp(.$influences[,col]),pch=16,cex=1.25,col='black',type='o',xaxt='n',las=1,ylab='Influence',ylim=ylim,xlim=xlim)
+      abline(h=1,lty=2)
+      legend('topleft',legend=names(.$influences)[col],bty='n')
+    }
+    axis(side=1,at=1:length(.$influences$level),labels=.$influences$level)
+  }
+  else{
+    with(.$influences,{
+      plot(NA,ylim=ylim,xlim=xlim,las=1,ylab='Influence',xlab=.$labels[[.$focus]],xaxt='n')
+      for(col in cols) lines(as.integer(level),exp(.$influences[,col]),type='o',pch=col,cex=1.25)
+      axis(side=1,at=1:length(level),labels=level)
+      legend('top',legend=names(.$influences)[cols],pch=cols,pt.cex=1.25,bty='n')
+      abline(h=1,lty=2)
+    })
+  }
+}
+
+#' Step and influence plots
+#'
+#' Side by side, panellised step and influence plots
+#'
+#' @name Influence$stepAndInfluPlot
+#' @return None
+Influence$stepAndInfluPlot <- function(.){
+  par(mfcol=c(ncol(.$indices)-5,2),mar=c(0,5,0,0),oma=c(4,1,1,1))
+  .$stepPlot(setpar=F)
+  #Create a blank plot in the top of the influences column for the row for the focus term.
+  plot.new()
+  .$influPlot(setpar=F)
 }
 
 #' A coefficient-distribution-influence (CDI) plot for a model term
