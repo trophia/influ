@@ -29,14 +29,14 @@ system('rm -rf influ')
 package.skeleton('influ',code_files='influ.R',force=TRUE)
 #Write DESCRIPTION file. Note roxygen will overwrite some of this
 cat("Package: influ
-Type: Package
 Title: Influence plots and metrics
 Version:",version,"
 Date:",date,"
 Author: Nokome Bentley <nbentley@trophia.com>
 Maintainer: Nokome Bentley <nbentley@trophia.com>
 URL: http://projects.trophia.com/influ
-Description: A package for generating step plots, influence plots, CDI plots, and influence metrics for a GLM model
+Description: A package for generating step plots, influence plots, coefficient-distribution-influence plots, and influence metrics for a GLM model.
+Citation: Bentley, N., Kendrick, T. H., Starr, P. J., & Breen, P. A. (in preparation). Influence plots and metrics: tools for better understanding fisheries catch per unit effort standardisations.
 License: BSD 2-Clause
 LazyLoad: yes
 Collate: 'influ.R'

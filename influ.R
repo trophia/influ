@@ -16,7 +16,7 @@
 #' A package for generating step plots, influence plots, CDI plots, and influence metrics for a linear model
 #'
 #' The concept of influence in generalised linear models is described in 
-#' Bentley, N., Kendrick, T. H., Starr, P. J., & Breen, P. A. (in preparation). Influence plots and metrics: tools for better understanding fisheries catch per unit effort standardisations..
+#' Bentley, N., Kendrick, T. H., Starr, P. J., & Breen, P. A. (in preparation). Influence plots and metrics: tools for better understanding fisheries catch per unit effort standardisations.
 #' This package provides an implementation of the plots and metrics described in that paper.
 #'
 #' Currently, this package works for \code{glm} models with log transformed dependent variables. These
@@ -138,7 +138,7 @@ Influence$effects = function(.,model=.$model,term=.$focus){
 #' This method must be called for the \code{$summary} data frame to be available or before any plots (\code{$stanPlot(),$stepPlot(),$influPlot(),$cdiPlot()}) can be generated from the Influence object
 #'
 #' @name Influence$calc
-#' @value None
+#' @return None
 Influence$calc <- function(.){
   #Create a summary table that is an augmented ANOVA table
   #TODO to speed up make this part of term loop
