@@ -311,6 +311,7 @@ Influence$cdiPlot <- function(.,term,variable=NULL){
     abline(h=1,lty=2)
     abline(v=xs,lty=1,col='grey')
     segments(as.integer(term),exp(lower),as.integer(term),exp(upper))
+    arrows(as.integer(term),exp(lower),as.integer(term),exp(upper),angle=90,code=3,length=0.05)
     axis(3,at=xs,labels=levels(term)[xs])
   })
 

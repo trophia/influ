@@ -20,8 +20,8 @@
 
 library(roxygen)
 
-version = '0.5'
-date = '2011-08-29'
+version = '0.6'
+date = '2011-10-02'
 
 #Delete the existing package directory because package.skeleton does not seem to overwrite code files otherwise
 system('rm -rf influ')
