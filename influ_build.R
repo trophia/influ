@@ -18,15 +18,17 @@
 #' R --vanilla < influ_build.R
 #'
 
-library(roxygen)
+library(roxygen2)
 
-version = '0.6'
-date = '2011-10-02'
+version = '0.7'
+date = '2011-11-21'
 
 #Delete the existing package directory because package.skeleton does not seem to overwrite code files otherwise
 system('rm -rf influ')
+
 #Create a package skeleton
 package.skeleton('influ',code_files='influ.R',force=TRUE)
+
 #Write DESCRIPTION file. Note roxygen will overwrite some of this
 cat("Package: influ
 Title: Influence plots and metrics
@@ -42,6 +44,7 @@ LazyLoad: yes
 Collate: 'influ.R'
 Depends: proto
 ",file = 'influ/DESCRIPTION')
+
 #Run roxygen ("R CMD roxygen -d influ" could be used instead)
 roxygenize('influ',roxygen.dir='influ',copy.package=FALSE,unlink.target=FALSE)
 

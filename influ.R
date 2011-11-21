@@ -16,8 +16,8 @@
 #' A package for generating step plots, influence plots, CDI plots, and influence metrics for a linear model
 #'
 #' The concept of influence in generalised linear models is described in 
-#' Bentley, N., Kendrick, T. H., Starr, P. J., & Breen, P. A. (in preparation). Influence plots and metrics: tools for better understanding fisheries catch per unit effort standardisations.
-#' This package provides an implementation of the plots and metrics described in that paper.
+#' Bentley, N., Kendrick, T. H., Starr, P. J., & Breen, P. A. (2011). Influence plots and metrics: tools for better understanding fisheries catch-per-unit-effort standardisations.
+#' This package provides an implementation of the plots and metrics described in that paper. ICES Journal of Marine Science, doi:10.1093/icesjms/fsr174.
 #'
 #' Currently, this package works for \code{glm} models with log transformed dependent variables. These
 #' are the type of models commonly used for one part of the delta-lognormal approach to catch-per-unit-effort (CPUE)
@@ -27,11 +27,12 @@
 #' This document provides minimal documentation and the best way to learn how to use this package is through the vignette:
 #'	"An example of how to use the 'influ' package"
 #'
+#' @docType package
 #' @name influ-package
 #' @aliases influ
-#' @docType package
 #' @title Influence in linear models 
 #' @author Nokome Bentley
+#' @import proto
 NULL
 
 library(proto)
@@ -406,7 +407,7 @@ Influence$cdiPlot <- function(.,term,variable=NULL){
 #' @param done A function that is called (with the term string as an argument) after each CDI plot is generated. Optional.
 #' @return None
 Influence$cdiPlotAll <- function(.,done=function(term){
-  cat("cdiPlot for",term,". Press enter for next\n")
+  cat("cdiPlot for",term,". Press enter for next")
   scan()
 }){
   for(term in .$terms) {
