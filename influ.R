@@ -33,6 +33,7 @@
 #' @title Influence in linear models 
 #' @author Nokome Bentley
 #' @import proto
+#' @export Influence
 NULL
 
 library(proto)
