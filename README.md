@@ -4,7 +4,7 @@
 
 A package for the R language which generates step plots, influence plots, coefficient-distribution-influence (CDI) plots, and influence metrics for linear models
 as described in the paper [Bentley, N., Kendrick, T. H., Starr, P. J., & Breen, P. A. (2011). Influence plots and metrics: tools for better understanding fisheries catch-per-unit-effort standardisations. ICES Journal of Marine Science, 69: 84-88. doi:10.1093/icesjms/fsr174](http://icesjms.oxfordjournals.org/cgi/reprint/fsr174?
-ijkey=zZGx3RoK1zkxhaL&keytype=ref)
+ijkey=zZGx3RoK1zkxhaL&keytype=ref) (There is a pre-print, pre-review version [here](https://github.com/downloads/trophia/influ/Bentley%20et%20al%20(preprint)%20CPUE%20influence.pdf) but the above link is recommended as it gives full access to the final version)
 
 ## How do I get it?
 
@@ -16,15 +16,15 @@ Eventually influ will be submitted to the [Comprehensive R Archive Network](http
 We recommend looking at the `influ` [vignette](https://github.com/downloads/trophia/influ/influ_vignette.pdf) first. But if you don't have time for even that, here an even quicker run down....
 
 ```R
- #Install the package after downloading it
- install.packages("/path/to/influ_0.6.zip",repos=NULL) #Windows
- install.packages("/path/to/influ_0.6.tar.gz",repos=NULL) #Linux
-  
- #Load the package
- library(influ)
-  
- #Fit a glm model (the first term, in this case year, should be a factor!)
- myModel = glm(log(catch)~year+effort+month+area+depth+method,data=myData)
+#Install the package after downloading it
+install.packages("/path/to/influ_0.6.zip",repos=NULL) #Windows
+install.packages("/path/to/influ_0.6.tar.gz",repos=NULL) #Linux
+
+#Load the package
+library(influ)
+
+#Fit a glm model (the first term, in this case year, should be a factor!)
+myModel = glm(log(catch)~year+effort+month+area+depth+method,data=myData)
  
 ##Create an influence object for that model
 myInfl = Influence$new(myModel)

@@ -16,7 +16,7 @@
 #' A package for generating step plots, influence plots, CDI plots, and influence metrics for a linear model
 #'
 #' The concept of influence in generalised linear models is described in 
-#' Bentley, N., Kendrick, T. H., Starr, P. J., & Breen, P. A. (2011). Influence plots and metrics: tools for better understanding fisheries catch-per-unit-effort standardisations. ICES Journal of Marine Science, doi:10.1093/icesjms/fsr174.
+#' Bentley, N., Kendrick, T. H., Starr, P. J., & Breen, P. A. (2011). Influence plots and metrics: tools for better understanding fisheries catch-per-unit-effort standardisations. ICES Journal of Marine Science, 69: 84-88. doi:10.1093/icesjms/fsr174.
 #' This package provides an implementation of the plots and metrics described in that paper.
 #'
 #' Currently, this package works for \code{glm} models with log transformed dependent variables. These
