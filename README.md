@@ -4,7 +4,7 @@
 
 A package for the R language which generates step plots, influence plots, coefficient-distribution-influence (CDI) plots, and influence metrics for linear models
 as described in the paper [Bentley, N., Kendrick, T. H., Starr, P. J., & Breen, P. A. (2011). Influence plots and metrics: tools for better understanding fisheries catch-per-unit-effort standardisations. ICES Journal of Marine Science, 69: 84-88. doi:10.1093/icesjms/fsr174](http://icesjms.oxfordjournals.org/cgi/reprint/fsr174?
-ijkey=zZGx3RoK1zkxhaL&keytype=ref) (There is a pre-print, pre-review version [here](https://github.com/downloads/trophia/influ/Bentley%20et%20al%20(preprint)%20CPUE%20influence.pdf) but the above link is recommended as it gives full access to the final version)
+ijkey=zZGx3RoK1zkxhaL&keytype=ref) (There is a pre-print, pre-review version [here](https://github.com/downloads/trophia/influ/Bentley%20et%20al%20%28preprint%29%20CPUE%20influence.pdf) but the above link is recommended as it gives full access to the final version)
 
 ## How do I get it?
 
