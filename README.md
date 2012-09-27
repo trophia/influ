@@ -15,7 +15,7 @@ Eventually influ will be submitted to the [Comprehensive R Archive Network](http
 
 We recommend looking at the `influ` [vignette](https://github.com/downloads/trophia/influ/influ_vignette.pdf) first. But if you don't have time for even that, here an even quicker run down....
 
-```R
+```s
 #Install the package after downloading it
 install.packages("/path/to/influ_0.6.zip",repos=NULL) #Windows
 install.packages("/path/to/influ_0.6.tar.gz",repos=NULL) #Linux
