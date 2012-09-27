@@ -1,0 +1,7 @@
+#Ignore package builds
+influ
+influ.Rcheck
+influ_*.tar.gz
+
+#Ignore data for vignette
+tre7.csv
