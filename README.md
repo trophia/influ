@@ -8,12 +8,12 @@ ijkey=zZGx3RoK1zkxhaL&keytype=ref) (There is a pre-print, pre-review version [he
 
 ## How do I get it?
 
-The package is still in development. A beta version is available under [Downloads](https://github.com/trophia/influ/downloads). 
+The package is still in development. A beta version is available under [Releases](https://github.com/trophia/influ/releases/). 
 Eventually influ will be submitted to the [Comprehensive R Archive Network](http://cran.r-project.org/) for direct installation via the `install.packages` R function.
 
 ## How do I use it?
 
-We recommend looking at the `influ` [vignette](https://github.com/downloads/trophia/influ/influ_vignette.pdf) first. But if you don't have time for even that, here an even quicker run down....
+We recommend looking at the `influ` [vignette](https://github.com/trophia/influ/releases/download/0.8/influ_vignette.pdf) first. But if you don't have time for even that, here's an even quicker run down....
 
 ```s
 #Install the package after downloading it

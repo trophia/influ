@@ -110,7 +110,7 @@ Influence$init <- function(.){
 #'
 #' Extracts the coefficients
 #'
-#' @name Influence$coeffs
+#' @name coeffs
 #' @param model The model to extract coefficients from
 #' @param term The term in the model for which coefficients are extracted
 #' @return A vector of coefficients                                                                     
@@ -124,7 +124,7 @@ coeffs = function(.,model=.$model,term=.$focus){
 #'
 #' Extract standard errors using the method of Francis
 #'
-#' @name Influence$ses
+#' @name ses
 #' @param model The model to extract standard errors for a coefficient from
 #' @param term The term in the model for which coefficients SEs are extracted
 ses = function(.,model=.$model,term=.$focus){
