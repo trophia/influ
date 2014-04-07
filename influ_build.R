@@ -1,4 +1,4 @@
-# Copyright (c) 2010-2011 Nokome Bentley, Trophia Ltd
+# Copyright (c) 2010-2014 Nokome Bentley, Trophia Ltd
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -15,13 +15,13 @@
 
 #' A script for building the "influ" package on Linux
 #'
-#' R --vanilla < influ_build.R
+#' R --interactive --vanilla < influ_build.R
 #'
 
 library(roxygen2)
 
-version = '0.7.1'
-date = '2011-12-07'
+version = '0.8'
+date = '2014-04-07'
 
 #Delete the existing package directory because package.skeleton does not seem to overwrite code files otherwise
 system('rm -rf influ')
@@ -38,7 +38,7 @@ Author: Nokome Bentley <nbentley@trophia.com>
 Maintainer: Nokome Bentley <nbentley@trophia.com>
 URL: http://projects.trophia.com/influ
 Description: A package for generating step plots, influence plots, coefficient-distribution-influence plots, and influence metrics for a GLM model.
-Citation: Bentley, N., Kendrick, T. H., Starr, P. J., & Breen, P. A. (in preparation). Influence plots and metrics: tools for better understanding fisheries catch per unit effort standardisations.
+Citation: Bentley, N., Kendrick, T. H., Starr, P. J., & Breen, P. A. (2011). Influence plots and metrics: tools for better understanding fisheries catch per unit effort standardisations. ICES Journal of Marine Science, 69: 84-88.
 License: BSD 2-Clause
 LazyLoad: yes
 Collate: 'influ.R'

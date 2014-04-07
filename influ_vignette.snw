@@ -9,7 +9,7 @@
 
 <<echo=FALSE>>=
 #Use source to load Influence. Do this rather than library(influ) so that 
-#changes in influ.R are immeadiately available without having to rebuild package
+#changes in influ.R are immediately available without having to rebuild package
 source('influ.R')
 #Load and prepare data
 data = read.table("tre7.csv",colClasses='character',sep=",",header=T)
@@ -25,18 +25,18 @@ data = within(data,{
   num = as.numeric(num)
   catch = as.numeric(catch)
 })
-#Only use positive catches
-data = subset(data,catch>0 & num>0)
 #For this vignette rename some variables
 names(data)[1] = 'year'
 names(data)[6] = 'tows'
 tre7 = data
 @
 
-For this vignette we use the same TRE 7 data, and the same generalised linear model, 
-as described in Bentley et al (in prep),
+\section{The basics}
+
+To begin, we use the same TRE 7 data, and the same generalized linear model, 
+as described in Bentley et al (2011),
 <<>>=
-model = glm(log(catch)~year+log(tows)+month+vessel+target+area,data=tre7)
+model = glm(log(catch)~year+log(tows)+month+vessel+target+area,data=subset(tre7,catch>0 & tows>0))
 @
 
 Load the influ package into the workspace the usual way,\texttt{library(influ)}, 
@@ -88,8 +88,8 @@ infYear$influPlot()
 @
 \end{center}
 
-Coefficient-distribution-influence (CDI) plots (see Bentley et al (in prep) for a description) can be generated for
-a single term using the /texttt{cdiPlot} method,
+Coefficient-distribution-influence (CDI) plots (see Bentley et al (2011) for a description) can be generated for
+a single term using the \texttt{cdiPlot} method,
 \begin{center}
 <<fig=TRUE,echo=TRUE>>=
 infYear$cdiPlot('month')
@@ -120,5 +120,39 @@ infYear$cdiPlotAll(function(term)dev.copy2pdf(file=paste("CDI ",term,".pdf",sep=
 @
 In the above example a PDF file is created for each CDI plot with the name "CDI month.pdf" etc. Note that 
 the option \texttt{infYear\$order['vessel'] = 'coef'} will still apply to vessel CDI plot created by this call.
+
+\section{Alternative types of models}
+
+The \texttt{influ} package can deal with a limited number of model types other than that produced by \texttt{glm}.
+In most cases you need to also specify the the \texttt{data} argument to \texttt{Influence\$new} (see examples below)
+
+\subsection{Negative binomial model using package \texttt{MASS}}
+<<>>=
+library(MASS)
+influ = Influence$new(
+  glm.nb(catch~year+month+vessel+target+area,data=tre7),
+  data = tre7
+)
+influ$calc()
+influ$cdiPlot('month')
+@
+
+\subsection{Weibull model using package \texttt{survival}}
+
+When using \texttt{survreg} make sure you specify \texttt{model=T}:
+
+<<>>=
+library(survival)
+influ = Influence$new(
+  survreg(Surv(catch)~year+month+vessel+target+area,data=subset(tre7,catch>0),model=T,dist="weibull"),
+  data = subset(tre7,catch>0)
+)
+influ$calc()
+influ$cdiPlot('month')
+@
+
+\section{References}
+
+Bentley, N., Kendrick, T. H., Starr, P. J., & Breen, P. A. (2011) Influence plots and metrics: tools for better understanding fisheries catch-per-unit-effort standardisations. ICES Journal of Marine Science, 69: 84-88.
 
 \end{document}

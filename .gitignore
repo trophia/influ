@@ -2,6 +2,10 @@
 influ
 influ.Rcheck
 influ_*.tar.gz
+*.pdf
+influ_vignette.aux
+influ_vignette.log
+influ_vignette.tex
 
 #Ignore data for vignette
 tre7.csv
