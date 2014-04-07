@@ -5,3 +5,7 @@ influ_*.tar.gz
 
 #Ignore data for vignette
 tre7.csv
+
+#Ignore editor files
+*.sublime-workspace
+*.sublime-project

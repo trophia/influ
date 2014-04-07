@@ -17,8 +17,8 @@ We recommend looking at the `influ` [vignette](https://github.com/downloads/trop
 
 ```s
 #Install the package after downloading it
-install.packages("/path/to/influ_0.6.zip",repos=NULL) #Windows
-install.packages("/path/to/influ_0.6.tar.gz",repos=NULL) #Linux
+install.packages("/path/to/influ_0.X.zip",repos=NULL) #Windows
+install.packages("/path/to/influ_0.X.tar.gz",repos=NULL) #Linux
 
 #Load the package
 library(influ)
