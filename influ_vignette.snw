@@ -121,6 +121,22 @@ infYear$cdiPlotAll(function(term)dev.copy2pdf(file=paste("CDI ",term,".pdf",sep=
 In the above example a PDF file is created for each CDI plot with the name "CDI month.pdf" etc. Note that 
 the option \texttt{infYear\$order['vessel'] = 'coef'} will still apply to vessel CDI plot created by this call.
 
+\section{Models with "unusual" terms}
+
+The \texttt{influ} package can deal with models that have terms like splines and polynomials. The trick here is
+to make sure that you use the right string to retrieve the term (R may reformat the term). Use \texttt{$terms} to get a list of model terms.
+
+<<>>=
+library(splines)
+influ = Influence$new(
+  glm(log(catch)~year+month+vessel+target+area+ns(log(tows),df=3),data=subset(tre7,catch>0 & tows>0))
+)
+influ$calc()
+influ$terms
+# Note the extra spaces in this string, so that it matches what is in influ$terms
+influ$cdiPlot('ns(log(tows), df = 3)')
+@
+
 \section{Alternative types of models}
 
 The \texttt{influ} package can deal with a limited number of model types other than that produced by \texttt{glm}.
