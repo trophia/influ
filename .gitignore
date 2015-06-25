@@ -2,6 +2,7 @@
 influ
 influ.Rcheck
 influ_*.tar.gz
+influ_*.zip
 *.pdf
 influ_vignette.aux
 influ_vignette.log
