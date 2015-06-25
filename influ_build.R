@@ -18,10 +18,11 @@
 #' R --interactive --vanilla < influ_build.R
 #'
 
+library(methods)
 library(roxygen2)
 
-version = '0.8'
-date = '2014-04-07'
+version = '0.9'
+date = '2015-06-26'
 
 #Delete the existing package directory because package.skeleton does not seem to overwrite code files otherwise
 system('rm -rf influ')
@@ -46,7 +47,7 @@ Depends: proto
 ",file = 'influ/DESCRIPTION')
 
 #Run roxygen ("R CMD roxygen -d influ" could be used instead)
-roxygenize('influ',roxygen.dir='influ',copy.package=FALSE,unlink.target=FALSE)
+roxygenize('influ')
 
 ##Check the package using builtin R check utility and copy the manual that is produced
 system('R CMD check influ')
