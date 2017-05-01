@@ -262,7 +262,7 @@ Influence$calc <- function(.){
   preds = predict(.$model,type='terms',se.fit=T)
   fit = as.data.frame(preds$fit)
   se.fit = as.data.frame(preds$se.fit)
-  preds = cbind(fit,se.fit)
+  preds = as.data.frame(bind_cols(fit,se.fit))
   names(preds) = c(paste('fit',names(fit),sep='.'),paste('se.fit',names(fit),sep='.'))
   .$preds = cbind(.$data,preds)
   #Calculate influences and statisitcs
