@@ -264,7 +264,7 @@ Influence$calc <- function(.){
   se.fit = as.data.frame(preds$se.fit)
   preds = cbind(fit,se.fit)
   names(preds) = c(paste('fit',names(fit),sep='.'),paste('se.fit',names(fit),sep='.'))
-  .$preds = cbind(.$data,preds)
+  .$preds = bind_cols(.$data,preds)
   #Calculate influences and statisitcs
   .$influences = data.frame(level=levels(.$model$model[,.$focus]))
   overall = c(NA,NA) # NAs for null model and for focus term
